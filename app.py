@@ -251,32 +251,32 @@ def getFooter( company ):
     data = getFooterSQL( res[0]["id"] )
     return data, 200
 
-@app.route("/getContentLoanProgram/<company>/<category_type>/<page>", methods=["GET"])
+@app.route("/getContentLoanProgram/<company>/<product>/<page>", methods=["GET"])
 @cross_origin()
-def getContentLoanProgram( company, category_type, page ):
+def getContentLoanProgram( company, product, page ):
     data = []
-    if category_type == "CONFORMING":
-        data = getConformingSQL( company, page )
-    elif category_type == "LIMITED_INCOME":
-        data = getLimitedIncomeSQL( company, page )
-    elif category_type == "AGENCY_JUMBO":
-        data = getAgencyJumboSQL( company, page )
-    elif category_type == "FHA":
-        data = getproductByTypesSQL( company, page, 2, 3 )
-    elif category_type == "USDA":
-        data = getproductByTypesSQL( company, page, 2, 4 )
-    elif category_type == "VA":
-        data = getproductByTypesSQL( company, page, 2, 5 )
-    elif category_type == "203K":
-        data = getproductByTypesSQL( company, page, 2, 6 )
-    elif category_type == "Reverse":
-        data = getproductByTypesSQL( company, page, 2, 13 )
-    elif category_type == "Non_QM":
-        data = getproductByTypesSQL( company, page, 3, 7 )
-    elif category_type == "Jumbo":
-        data = getproductByTypesSQL( company, page, 3, 9 )
-    elif category_type == "Simple":
-        data = getproductByTypesSQL( company, page, 4, 11 )
+    if product == "CONFORMING":
+        data = getStatusProducsByCategory( company, page, product, 1 )
+    elif product == "LIMITED_INCOME":
+        data = getStatusProducsByCategory( company, page, product, 1 )
+    elif product == "AGENCY_JUMBO":
+        data = getStatusProducsByCategory( company, page, product, 1 )
+    elif product == "FHA":
+        data = getStatusProducsByCategory( company, page, product, 2, 3 )
+    elif product == "USDA":
+        data = getStatusProducsByCategory( company, page, product, 2, 4 )
+    elif product == "VA":
+        data = getStatusProducsByCategory( company, page, product, 2, 5 )
+    elif product == "203K":
+        data = getStatusProducsByCategory( company, page, product, 2, 6 )
+    elif product == "Reverse":
+        data = getStatusProducsByCategory( company, page, product, 2, 13 )
+    elif product == "Non_QM":
+        data = getStatusProducsByCategory( company, page, product, 3, 7 )
+    elif product == "Jumbo":
+        data = getStatusProducsByCategory( company, page, product, 3, 9 )
+    elif product == "Simple":
+        data = getStatusProducsByCategory( company, page, product, 4, 11 )
     return data, 200
 
 @app.route("/getMortgagResources/<company>", methods=["GET"])
