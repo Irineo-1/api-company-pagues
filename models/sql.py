@@ -399,7 +399,7 @@ def getListArm( category_type, c_sql, c_id ):
 
 def getMinLTV( list_s ):
     try:
-        min = abs(list_s[0][" "])
+        min = abs(list_s[0]["ltv0_60"])
         key_max = ""
         for key in list_s[0]:
             if not abs(list_s[0][key]) == 100.0 and abs(list_s[0][key]) > min or abs(list_s[0][key]) == min:
