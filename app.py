@@ -303,8 +303,9 @@ def getFlayers( company ):
 # Routes --
 
 if __name__ == "__main__":
+    context = ('../1smtg.com/1smtg.com.crt', '../1smtg.com/1smtg.com.key')
     # context = ('server.crt', 'server.key')
-    app.run( host='0.0.0.0', port=220, debug=True )
-    # app.run( host='0.0.0.0', port=220, ssl_context=context )
+    # app.run( host='0.0.0.0', port=220, debug=True )
+    app.run( host='0.0.0.0', port=220, ssl_context=context )
 
 # get url de la peticion https://stackoverflow.com/questions/15974730/how-do-i-get-the-different-parts-of-a-flask-requests-url
