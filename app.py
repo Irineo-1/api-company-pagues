@@ -78,7 +78,7 @@ def getEnterpriseColors( company ):
 def sendEmail( company, name, email, phone, subject, message ):
     data = getInformationEnterpriseSQL( company )
     res = json.loads(data)
-    # res[0]["email"]
+
     msg = Message( subject, sender ='info@1smtg.com', recipients = [ 'info@1smtg.com' ] )
     
     imgEnterpriseHTML = f'<img src="http://1smtg.com/picture.php?name={res[0]["picture"]}" style="width: 200px; margin-bottom: 20px;">'
@@ -91,6 +91,76 @@ def sendEmail( company, name, email, phone, subject, message ):
     msg.html = f"{imgEnterpriseHTML} <br> {messageHTML} <br> {nameHTML} {emailHTML} {phoneHTML} <br><br> {fotherHTML}"
     mail.send(msg) 
     return {"sent": "true"}, 200
+
+@app.route("/sendEmail/emailApply", methods=["POST"])
+@cross_origin()
+def sendEmailApply():
+    email_lon_of = ""
+    company = request.json["company"]
+    if request.json["email_lon_of"] == "":
+        users = json.loads( getAllUsersSQL( company, "mlo", 0 ) )
+        CEO = list( filter(lambda x: x["title"] == "CEO", users) )
+        data_ceo = json.loads( getUserSQL( CEO[0]["id"] ) )
+        email_lon_of = data_ceo[0]["email"]
+    else:
+        email_lon_of = request.json["email_lon_of"]
+    
+    # user information
+    user_cli = request.json["user_cli"]
+    email_cli = request.json["email_cli"]
+    phone_cli = request.json["phone_cli"]
+    product = request.json["product"]
+    # end user information
+
+    # inputs select information
+    mortgage_type = request.json["mortgage_type"]
+    zip_code = request.json["zip_code"]
+    purches_price = request.json["purches_price"]
+    cash_out = request.json["cash_out"]
+    down_payment = request.json["down_payment"]
+    loan_balance = request.json["loan_balance"]
+    credit_score_value = request.json["credit_score_value"]
+    term = request.json["term"]
+    # end inputs select information
+
+    company_data = getInformationEnterpriseSQL( company )
+    res = json.loads(company_data)
+
+    msg = Message( "New prospect want to apply", sender ='info@1smtg.com', recipients = [ email_lon_of ] )
+    
+    imgEnterpriseHTML = f'<img src="http://1smtg.com/picture.php?name={res[0]["picture"]}" style="width: 200px; margin-bottom: 20px;">'
+    messageHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">New prospect want to apply</h1></div>'
+    nameHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Name:</h5> <span> {user_cli} </span> </div>'
+    emailHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Email:</h5> <span> {email_cli} </span> </div>'
+    phoneHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Phone:</h5> <span> {phone_cli} </span> </div>'
+    productSHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">Product select</h1></div>'
+    namePHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Name product:</h5> <span> {product["name"]} </span> </div>'
+    rateHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Rate:</h5> <span> {product["rate"]} </span> </div>'
+    aprHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Apr:</h5> <span> {product["apr"]} </span> </div>'
+    closingcostHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Closing cost:</h5> <span> {product["closing_cost"]} </span> </div>'
+    monthlyHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Monthly payment:</h5> <span> {product["mo_payment"]} </span> </div>'
+    captureuserSHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">Data capture</h1></div>'
+    mortgagetypeHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Mortgage type:</h5> <span> {mortgage_type} </span> </div>'
+    zipcodeHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">ZIP code:</h5> <span> {zip_code} </span> </div>'
+    purchespriceHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Purchase price:</h5> <span> {purches_price} </span> </div>'
+    cashoutHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Cash-out:</h5> <span> {cash_out} </span> </div>'
+    downpaymentHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Down payment:</h5> <span> {down_payment} </span> </div>'
+    loanbalanceHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Loan balance:</h5> <span> {loan_balance} </span> </div>'
+    creditscorevalueHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Credit score:</h5> <span> {credit_score_value} </span> </div>'
+    termHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Loan term:</h5> <span> {term} </span> </div>'
+    fotherHTML = f'<div style="background: #555; padding: 10px; font-size: 12px; text-align: center; color: #fff;">1Solution | Support | Privacy Policy<br>© 2021 Copyright: Zero 1Solution LLC, All rights reserved. 2111 West March Lane, Stockton CA 95207</div>'
+
+    msg.html = f"{imgEnterpriseHTML} <br> {messageHTML} <br> {nameHTML} {emailHTML} {phoneHTML} <br> {productSHTML} <br> {namePHTML} {rateHTML} {aprHTML} {closingcostHTML} {monthlyHTML} <br> {captureuserSHTML} <br> {mortgagetypeHTML} {zipcodeHTML} {purchespriceHTML} {cashoutHTML} {downpaymentHTML} {loanbalanceHTML} {creditscorevalueHTML} {termHTML} <br><br> {fotherHTML}"
+    mail.send(msg)
+
+    msg = Message( "Response request", sender = email_lon_of, recipients = [ email_cli ] )
+
+    messageBackHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">I received your request, in one minute I will give you more information</h1></div>'
+
+    msg.html = f"{imgEnterpriseHTML} <br> {messageBackHTML}"
+    mail.send(msg)
+    return {"sent": "true"}, 200
+    # return CEO, 200
 
 @app.route("/getVideoById/<company>/<user_id>", methods=["GET"])
 @cross_origin()
@@ -303,9 +373,9 @@ def getFlayers( company ):
 # Routes --
 
 if __name__ == "__main__":
-    context = ('../1smtg.com/1smtg.com.crt', '../1smtg.com/1smtg.com.key')
+    # context = ('../1smtg.com/1smtg.com.crt', '../1smtg.com/1smtg.com.key')
     # context = ('server.crt', 'server.key')
-    # app.run( host='0.0.0.0', port=220, debug=True )
-    app.run( host='0.0.0.0', port=220, ssl_context=context )
+    app.run( host='0.0.0.0', port=220, debug=True )
+    # app.run( host='0.0.0.0', port=220, ssl_context=context )
 
 # get url de la peticion https://stackoverflow.com/questions/15974730/how-do-i-get-the-different-parts-of-a-flask-requests-url
