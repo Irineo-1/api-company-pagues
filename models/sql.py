@@ -18,10 +18,25 @@ def getAllUsersSQL( company, role, page ):
 
 def getUserSQL( user_id ):
     conn = getConnection()
-    sql = f"SELECT aboutme, name, picture, facebook, instagram, twitter, messenger, email, phone, nmls_id, title, branch FROM users WHERE id = '{user_id}'"
+    sql = "SELECT us.aboutme, us.name, us.picture, us.facebook, us.instagram, us.twitter, "
+    sql += "us.messenger, us.email, us.phone, us.nmls_id, us.title, bc.name as banche_name, "
+    sql += "bc.contact, bc.email as email_branch, bc.phone as phone_branch, bc.fax, bc.address, "
+    sql += "bc.state as state_branch, bc.website, bc.aboutus, bc.dba, bc.cell, bc.city, bc.zip, bc.disclaimer, bc.code "
+    sql += "FROM users us INNER JOIN branches bc ON us.branch = bc.id "
+    sql += f"WHERE us.id = '{user_id}'"
     df = pd.read_sql( sql, conn )
-    jsn = pd.DataFrame.to_json( df, orient="records" )
-    return jsn
+    jsn = json.loads(pd.DataFrame.to_json( df, orient="records" ))
+
+    sql_licences = f"SELECT state, nmls FROM approved_state WHERE user_id = { user_id }"
+
+    df_licences = pd.read_sql( sql_licences, conn )
+    lic = json.loads(pd.DataFrame.to_json( df_licences, orient="records" ))
+
+    jsn[0]['licences'] = lic
+
+    conn.commit()
+    conn.close()
+    return json.dumps( jsn )
 
 def getInformationEnterpriseSQL( company ):
     conn = getConnection()
