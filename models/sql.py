@@ -4,6 +4,8 @@ from pandas.io import sql
 import json
 from models.conection import getConnection
 import pandas as pd
+import uuid
+import random
 
 def getAllUsersSQL( company, role, page ):
     page_int = int(page)
@@ -223,6 +225,58 @@ def getContentMortgagResourcesSQL( id_loan ):
     conn.commit()
     conn.close()
     return jsn
+
+def isExistClient( email_cli ):
+    conn = getConnection()
+    sql = f"SELECT id, password, user FROM contacts WHERE bo_email = '{ email_cli }'"
+    df = pd.read_sql( sql, conn )
+    jsn = pd.DataFrame.to_json( df, orient="records" )
+    conn.commit()
+    conn.close()
+    return jsn
+
+def updateClient( id, password, user ):
+    conn_busqueda = getConnection()
+    sql = f"SELECT email FROM users WHERE id = '{user}'"
+    df = pd.read_sql( sql, conn_busqueda )
+    jsn = json.loads(pd.DataFrame.to_json( df, orient="records" ))
+    conn_busqueda.commit()
+    conn_busqueda.close()
+
+    conn = getConnection()
+    cursor = conn.cursor()
+    session_id = uuid.uuid4()
+    sql = f"UPDATE contacts SET session_id = '{session_id}'"
+    if password == "":
+        new_password = random.randint(999,9999)
+        sql += f", password = '{new_password}' "
+    sql += f"WHERE id = '{id}'"
+    cursor.execute(sql)
+    conn.commit()
+    conn.close()
+    return { "session_id": session_id, "password": password if ( password ) else new_password, "contact_id": id, "email_lon_of": jsn[0]["email"] }
+
+def addClient( first_name, middle_name, last_name, email, phone, email_lon_of ):
+    conn_busqueda = getConnection()
+    sql = f"SELECT id FROM users WHERE email = '{email_lon_of}'"
+    df = pd.read_sql( sql, conn_busqueda )
+    jsn = json.loads(pd.DataFrame.to_json( df, orient="records" ))
+    conn_busqueda.commit()
+    conn_busqueda.close()
+
+    conn = getConnection()
+    cursor = conn.cursor()
+
+    new_password = random.randint(999,9999)
+    session_id = uuid.uuid4()
+
+    sql = f"INSERT INTO contacts ( user, bo_first_name, bo_middle_name, bo_last_name, bo_email, bo_cell_alt, password, session_id ) VALUES( %s, %s, %s, %s, %s, %s, %s, %s )"
+    val = ( jsn[0]["id"], first_name, middle_name, last_name, email, phone, new_password, session_id )
+    cursor.execute(sql, val)
+    id = conn.insert_id()
+    conn.commit()
+    conn.close()
+    return { "session_id": session_id, "password": new_password, "contact_id": id, "email_lon_of": email_lon_of }
 
 def getListFixed( category_type, c_sql, c_id ):
     list_f = [{

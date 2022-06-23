@@ -106,7 +106,9 @@ def sendEmailApply():
         email_lon_of = request.json["email_lon_of"]
     
     # user information
-    user_cli = request.json["user_cli"]
+    first_name = request.json["first_name"]
+    middle_name = request.json["middle_name"]
+    last_name = request.json["last_name"]
     email_cli = request.json["email_cli"]
     phone_cli = request.json["phone_cli"]
     product = request.json["product"]
@@ -124,13 +126,23 @@ def sendEmailApply():
     # end inputs select information
 
     company_data = getInformationEnterpriseSQL( company )
-    res = json.loads(company_data)
+    res = json.loads( company_data )
+
+    validate_client = json.loads( isExistClient( email_cli ) )
+
+    cli_information_portal = updateClient( validate_client[0]["id"], validate_client[0]["password"], validate_client[0]["user"] ) if ( len( validate_client ) > 0 ) else addClient( first_name, middle_name, last_name, email_cli, phone_cli, email_lon_of )
+
+    email_lon_of = cli_information_portal["email_lon_of"] # In case that this user is register and select other lon officer diferent to he have selected
+
+    print(validate_client)
+    print(cli_information_portal)
+    print(email_lon_of)
 
     msg = Message( "New prospect want to apply", sender ='info@1smtg.com', recipients = [ email_lon_of ] )
     
     imgEnterpriseHTML = f'<img src="http://1smtg.com/picture.php?name={res[0]["picture"]}" style="width: 200px; margin-bottom: 20px;">'
     messageHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">New prospect want to apply</h1></div>'
-    nameHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Name:</h5> <span> {user_cli} </span> </div>'
+    nameHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Name:</h5> <span> {first_name} {middle_name} {last_name} </span> </div>'
     emailHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Email:</h5> <span> {email_cli} </span> </div>'
     phoneHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Phone:</h5> <span> {phone_cli} </span> </div>'
     productSHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">Product select</h1></div>'
@@ -155,12 +167,15 @@ def sendEmailApply():
 
     msg = Message( "Response request", sender = email_lon_of, recipients = [ email_cli ] )
 
-    messageBackHTML = f'<div style="margin-bottom: 15px;"> <h1 style="font-weight: 500;display: inline;">I received your request, in one minute I will give you more information</h1></div>'
+    messageBackHTML = f'<div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">I received your request, in one minute I will give you more information</h5></div>'
+    messageBackHTML += f'<br> <div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Your password is: {cli_information_portal["password"]}</h5></div>'
+    messageBackHTML += f'<br> <div style="margin-bottom: 15px;"> <h5 style="font-weight: 500;display: inline;">Please click <a href="https://1smtg.com/verify/{cli_information_portal["session_id"]}" target="_blank">here</a> to verify or on the verify button to access the portal</h5></div>'
+    messageBackHTML += f'<br> <div style="margin-bottom: 15px; background: #aa1816; display: inline; padding: 10px; cursor: pointer; box-shadow: 4px 4px 8px 1px black;"> <a style="text-decoration: none; color: white; font-weight: 600;" href="https://1smtg.com/verify/{cli_information_portal["session_id"]}" target="_blank">verify email</a></div>'
+
 
     msg.html = f"{imgEnterpriseHTML} <br> {messageBackHTML}"
     mail.send(msg)
-    return {"sent": "true"}, 200
-    # return CEO, 200
+    return cli_information_portal, 200
 
 @app.route("/getVideoById/<company>/<user_id>", methods=["GET"])
 @cross_origin()
