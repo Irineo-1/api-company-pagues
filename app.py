@@ -31,7 +31,7 @@ mail = Mail(app)
 @app.route("/")
 @cross_origin()
 def index():
-    return {"message": "puto el que lo lea"}
+    return {"message": ""}
 
 @app.route("/getAllUsers/<company>/<role>/<page>", methods=["GET"])
 @cross_origin()
@@ -392,5 +392,3 @@ if __name__ == "__main__":
     # context = ('server.crt', 'server.key')
     app.run( host='0.0.0.0', port=220, debug=True )
     # app.run( host='0.0.0.0', port=220, ssl_context=context )
-
-# get url de la peticion https://stackoverflow.com/questions/15974730/how-do-i-get-the-different-parts-of-a-flask-requests-url
